@@ -1,0 +1,11 @@
+.DS_Store
+*.log
+.env
+.env.*
+node_modules/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+state.json
+checkpoint.json
