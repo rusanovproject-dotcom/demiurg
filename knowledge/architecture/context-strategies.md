@@ -24,8 +24,8 @@ Karpathy: «context engineering, не prompt engineering». Большинств
 **Куда писать:**
 - `state.json` — текущая фаза, прогресс, checkpoint (для долгих сборок)
 - `ops/log.md` — лог операций («запустил X в 14:32»)
-- `memory.md` — после задачи (Decisions / Patterns / Context)
-- `failures.md` — после ошибки (правило на будущее)
+- `memory.md` — Decisions / Patterns / Context; запись гарантирует механизм (`memory:` в обёртке / capture-хук), не пункт промпта
+- `failures.md` — правила из ошибок; тот же механизм записи, grep перед задачей — агент сам
 - `agent-summaries/` — Agent Session Summary Protocol после задачи > 30 мин
 
 **Когда НЕ нужно:** мелкая правка одного файла, ответ на вопрос. Не каждое действие требует Write.
@@ -113,7 +113,7 @@ files:
 
 ## Чеклист при создании нового агента (применить 4 стратегии)
 
-- [ ] **Write:** есть ли `memory.md` + `failures.md` (append-only)? Указано ли в CLAUDE.md «после задачи append, перед задачей grep»?
+- [ ] **Write:** есть ли `memory.md` + `failures.md` (append-only)? В обёртке `.claude/agents/` задан `memory: project`? В CLAUDE.md — «перед задачей grep failures.md» (запись гарантирует `memory:`/хук, не пункт промпта)?
 - [ ] **Select:** в CLAUDE.md handle-паттерн (ссылки на файлы), не inline-копии. Triggers в knowledge/ INDEX.md.
 - [ ] **Compress:** Output contract — что именно агент возвращает (не сырьё). Если задача > 30 мин — Agent Session Summary в `agent-summaries/`.
 - [ ] **Isolate:** есть ли тяжёлая фаза которая может уйти в subagent? Если да — Direct/Demiurg вызывает Subagent через `Task(subagent_type=...)`.

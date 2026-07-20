@@ -37,7 +37,11 @@
 
 1. Прочитай context.md — пойми текущие приоритеты
 2. {step_2_specific_to_role}
-3. После завершения — обнови ops/log.md
+
+## Память
+
+- Перед задачей: прочитай `memory.md`, grep `failures.md` по теме (чтение на входе исполнимо).
+- Запись страхует механизм, не дисциплина: поле `memory:` в обёртке + capture-хук (см. `memory-architecture.md`).
 
 ## Решения
 
@@ -45,6 +49,34 @@
 - **С обсуждением:** {что требует обсуждения}
 - **Эскалация:** {что передаёт наверх}
 ```
+
+---
+
+## Обёртка-регистрация `.claude/agents/{name}.md` (обязательная пара к CLAUDE.md)
+
+Без файла в `.claude/agents/` агент для рантайма НЕ существует — его нельзя позвать по
+имени, это «файлы на диске», не сотрудник. Обёртку создаёт Builder на фазе BUILD (вместе
+с CLAUDE.md — иначе Validator даст блокер); WIRE её проверяет и принимает вызовом из
+чистой сессии. Путь — `.claude/agents/` в КОРНЕ офиса (директория с корневым CLAUDE.md
+офиса, родитель `team/` или `office/`), НЕ в папке агента:
+
+```markdown
+---
+name: {name}
+description: {Имя} — {роль одной фразой}. ОБЯЗАТЕЛЬНО использовать когда: {5 триггеров}. НЕ использовать для: {2-3 анти-триггера с адресатом}.
+tools: {минимальный allowlist под роль, вкл. конкретные mcp__server__tool}
+model: {opus|sonnet|haiku}
+memory: project
+---
+Ты — {Имя}. Загрузи `{путь к папке агента}/CLAUDE.md` (или core.md/soul.md/overrides.md).
+Прочитай `{путь}/memory.md`, grep `{путь}/failures.md` по теме задачи.
+Первая строка ответа: `_подключился — {Имя}, загружен core_`.
+```
+
+Только официальные поля frontmatter (`name`, `description`, `tools`, `disallowedTools`,
+`model`, `permissionMode`, `skills`, `mcpServers`, `hooks`, `memory`, `background`,
+`effort`, `isolation`, `color`). Самодельные (`mcp:`, `reports_to:`, `version:`) —
+игнорируются, не писать.
 
 ---
 

@@ -54,6 +54,20 @@ else
   fi
 fi
 
+# ─── 1b. Обёртка-регистрация в .claude/agents/ (канон 2026-07-20) ───
+WRAPPER="$OFFICE_DIR/.claude/agents/$AGENT_NAME.md"
+if [[ -f "$WRAPPER" ]]; then
+  if grep -q '^memory:' "$WRAPPER" 2>/dev/null; then
+    green "Обёртка .claude/agents/$AGENT_NAME.md найдена, memory: задан"
+  else
+    red "Обёртка есть, но нет поля memory: — память агента не включена"
+    ERRORS=$((ERRORS + 1))
+  fi
+else
+  red "Нет обёртки $WRAPPER — агента нельзя позвать по имени (Wire не завершён)"
+  ERRORS=$((ERRORS + 1))
+fi
+
 # ─── 2. Handoff-ссылки в CLAUDE.md агента валидны ───
 if [[ ! -f "$AGENT_CLAUDE_MD" ]]; then
   red "CLAUDE.md агента не найден: $AGENT_CLAUDE_MD"

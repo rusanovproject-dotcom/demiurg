@@ -117,8 +117,8 @@
 |------|---------|-----------------|
 | `core.md` | Ядро — роль, инструкции, pipeline | Template-managed (обновляется через `/update-agents`) |
 | `overrides.md` | Персональные правила клиента | Клиент пишет руками, **приоритет над core** |
-| `memory.md` | Decisions/Patterns/Context (append-only) | **Агент пишет сам** после задач |
-| `failures.md` | Ошибки + правила на будущее (append-only) | **Агент пишет сам**, grep перед каждой задачей |
+| `memory.md` | Decisions/Patterns/Context (append-only) | **Пишет механизм**: `memory: project` в обёртке / capture-хук + дистилляция; агент читает на входе (см. `memory-architecture.md`) |
+| `failures.md` | Ошибки + правила на будущее (append-only) | Тот же механизм; grep перед каждой задачей — обязанность агента |
 | `CLAUDE.md` | Склейка `@core.md @overrides.md` (если используется include) | Не трогать |
 
 Это даёт агенту **реальное обучение на опыте**, а не статичный промпт. Memory append-only — старые записи не переписываются.

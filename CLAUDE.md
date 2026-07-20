@@ -19,7 +19,7 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
 
 - Детали каждой фазы: `skills/build/SKILL.md`
 - Спецификации субагентов: `agents/INDEX.md` и `skills/build/references/subagent-specs.md`
-- Wire = финальная фаза: обновить `office/AGENTS.md` и `office/context.md` (если используешь Демиурга поверх собственного офиса), прописать handoff-ссылки в новом агенте
+- Wire = финальная фаза: **проверить обёртку-регистрацию в `.claude/agents/` корня офиса** (создана Builder'ом в BUILD; отсутствует — создать; без неё агент не зовётся по имени) + обновить `office/AGENTS.md` и `office/context.md` (если используешь Демиурга поверх собственного офиса) + handoff-ссылки. Приёмка: агент позвался по имени из чистой сессии
 
 ## Knowledge routing
 
@@ -42,6 +42,8 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
 Критерии "готов":
 - validate-agent.sh PASS (0 errors)
 - Validator score ≥ 80
+- Smoke-миссия пройдена (нет smoke → нет WIRE)
+- Обёртка в `.claude/agents/` создана, агент позвался по имени из чистой сессии
 - Все ссылки → существующие файлы
 - ≥2 примера Input → Output
 - Характер уникален (антиклон)
@@ -56,7 +58,8 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
 | Задача = создание скилла | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/agent-design.md` секцию «Когда что использовать» |
 | Задача = проектирование офиса | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/office-blueprint.md` + соответствующий `office-types/{type}.md` |
 | Задача = проектирование Director'а | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/director-cookbook.md` |
-| Задача = проектирование памяти | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/memory-architecture.md` |
+| Задача = проектирование памяти | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/memory-architecture.md` (канон 2026-07-20: трёхконтурная модель; ритуал «сам запишет после задачи» ЗАПРЕЩЁН как единственный механизм) |
+| Фаза WIRE | **ОБЯЗАТЕЛЬНО** обёртка в `.claude/agents/` корня офиса + вызов по имени из чистой сессии. Без этого «готов» не говорить |
 | Задача = handoff между агентами | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/handoff-library.md` и используй yaml-шаблон |
 | Запрос = «проверь офис», «наведи порядок» | **ОБЯЗАТЕЛЬНО** запусти `skills/audit-project/SKILL.md`, не делай аудит «по наитию» |
 | Минорная правка ≤30 строк / 1-2 файла | **НЕ грузи** ничего из knowledge/ — только сам файл и его соседей |

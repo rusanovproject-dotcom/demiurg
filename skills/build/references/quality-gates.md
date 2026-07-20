@@ -4,10 +4,11 @@
 
 | Этап | Условие перехода | Блокер? |
 |------|-----------------|---------|
-| Brief → Knowledge | Brief: роль + задачи + связи | Да |
+| Brief → Knowledge | Brief: роль + задачи + связи + рантайм (где живёт) | Да |
 | Knowledge → Build | Miner score ≥ 5 по 5 критериям | Да (score < 5 = СТОП) |
-| Build → Validate | validate-agent.sh PASS (0 errors) | Да |
-| Validate → Done | Validator score ≥ 80/100 | Нет (iterate) |
+| Build → Validate | validate-agent.sh PASS (0 errors), обёртка `.claude/agents/` создана | Да |
+| Validate → Wire | Validator score ≥ 80/100 И smoke-миссия пройдена | Нет (iterate) / smoke провален = СТОП |
+| Wire → Done | Обёртка в `.claude/agents/` корня офиса, агент позвался по имени из чистой сессии | Да |
 | Iterate | Макс 2 раунда, delta < 5 → стоп | Hardcoded |
 
 ## Knowledge Miner scoring
@@ -46,7 +47,7 @@
 | Blueprint → Team | scaffold выполнен, tree показан |
 | Team → Knowledge Mining | Таблица утверждена, нет пересечений |
 | Knowledge → Build | ВСЕ агенты Miner score ≥ 5 |
-| Build → Wiring | Все агенты Validator ≥ 80 |
+| Build → Wiring | Все агенты Validator ≥ 80 И smoke-миссия пройдена у каждого |
 | Wiring → Soul | DRY-RUN 3/3 pass |
 | Soul → Onboarding | Антиклон pass, характеры утверждены |
 | Onboarding → Complete | quick-start + user-guide + First Contact |

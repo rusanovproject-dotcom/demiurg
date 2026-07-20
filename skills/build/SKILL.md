@@ -36,10 +36,14 @@ TEAM — AI-офис с нуля (wizard + интервью)
 INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE
 ```
 
-- **INTAKE** — 5-6 уточняющих вопросов Хозяину одним сообщением → ответ одним сообщением
-   - 6 тем: роль, выход, взаимодействия, методологии, инструменты, триггеры
+- **INTAKE** — 6-7 уточняющих вопросов Хозяину одним сообщением → ответ одним сообщением
+   - 7 тем: роль, выход, взаимодействия, методологии, инструменты, триггеры,
+     **рантайм** («где агент будет жить: эфемерный субагент Claude Code / ТГ-бот / оба» —
+     определяет протокол памяти и обвязку, см. `knowledge/architecture/memory-architecture.md`)
+   - Роль — одной фразой БЕЗ союза «и». Две ответственности = два агента.
    - Без Intake Brief = твои фантазии, а не реальная потребность
    - Исключения: минорная правка (1-2 файла) ИЛИ Хозяин сказал «без вопросов»
+     (тогда рантайм по умолчанию = субагент Claude Code)
 - **BRIEF** — роль, задачи, связи (собирается ИЗ ответов Intake или из team table)
 - **SCOUT** — /scout <домен> → досье в knowledge/scout/<домен>-YYYY-MM-DD.md
    - Мировой топ: люди, методологии, публичные скиллы/промпты, MCP, prompt-engineering, reference
@@ -49,12 +53,36 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
    - Score < 5 = БЛОКЕР (нет данных → нет агента)
    - Score ≥ 5 → продолжаем
 - **BUILD** — Builder создаёт CLAUDE.md + skills/ (используя scout-досье + examples/)
-- **VALIDATE** — validate-agent.sh (бесплатно) → Validator (LLM)
+   - **Карта инструментов (обязательный шаг):** минимальный allowlist `tools:` под роль
+     + КОНКРЕТНЫЕ MCP (`mcp__<server>__<tool>` или `mcp__<server>`) из scout-досье.
+     Read-only ролям (валидаторы, разведка) — без Write/Edit. Опущенное `tools:`
+     (= унаследовать ВСЁ, включая MCP) — только осознанно, с пометкой почему.
+   - **Память под рантайм:** субагент CC → `memory: project` во frontmatter обёртки
+     + строка чтения памяти в теле; ТГ-бот → фенс-блок ```memory``` в output contract
+     + Stop-хук в мозге (handoff Гефесту, `/deploy-agent`)
+- **VALIDATE** — validate-agent.sh (бесплатно) → Validator (LLM) → smoke-миссия
    - Score < 60 = FAIL → пересобрать (назад к BUILD)
    - Score 60-79 = NEEDS WORK → Refiner фиксит → re-validate
-   - Score ≥ 80 = PASS
+   - Score ≥ 80 = PASS по статике
+   - **Smoke-миссия:** дай собранному агенту одну реальную задачу его роли через
+     Agent tool. Ответ мимо output contract или падение → NEEDS WORK.
+     **Нет пройденного smoke → нет WIRE.** Статический score ≥ 80 при проваленном
+     smoke = НЕ PASS (оцениваем результат, не структуру)
 - **ITERATE** — если NEEDS WORK, макс 2 раунда (BUILD→VALIDATE)
-- **WIRE** — Демиург сам: AGENTS.md, context.md, handoff-ссылки
+- **WIRE** — Демиург сам, три обязательных действия:
+   1. **Регистрация:** проверить/дочинить обёртку `.claude/agents/<name>.md` (создана
+      Builder'ом в BUILD; отсутствует — создать) в КОРНЕ офиса
+      (директория с корневым CLAUDE.md офиса — родитель `team/` или `office/`;
+      каталога нет → `mkdir -p .claude/agents/`). Шаблон обёртки — в
+      `knowledge/architecture/agent-design.md` («Обёртка-регистрация»): frontmatter
+      `name`, директивный `description` (TRIGGERS + ANTI-TRIGGERS, третье лицо),
+      `tools:` из карты инструментов, `model:`, `memory: project`; тело — «загрузи
+      CLAUDE.md/core.md агента, прочитай memory.md, grep failures.md».
+   2. Роутинг-карта офиса (AGENTS.md / team-registry) + handoff-ссылки — как раньше;
+      сверить, что реестр `.claude/agents/` и карта не расходятся.
+   3. **Приёмка регистрации:** из ЧИСТОЙ сессии позвать агента по имени — должен
+      подняться субагент (маркер «подключился — [Имя]»), а не отыгрыш роли.
+      Не поднялся → агент НЕ готов, вернись к п.1.
 
 **Зачем SCOUT перед KNOWLEDGE:** scout = внешний research (мировой топ по домену), knowledge = внутренний (что уже есть в workspace). Если собираем агента без знания мирового топа — теряем качество на старте. Scout закрывает эту дыру за ~10-15 минут.
 
@@ -108,12 +136,13 @@ bash scripts/validate-agent.sh /path/to/agent/
 
 | Этап | Условие перехода |
 |------|-----------------|
-| Intake → Brief | Получены ответы Хозяина на 5-6 вопросов (или явное «без вопросов» / минорная правка) |
+| Intake → Brief | Получены ответы Хозяина на 6-7 вопросов (или явное «без вопросов» / минорная правка) |
 | Brief → Scout | Brief содержит: роль (домен), задачи, связи |
 | Scout → Knowledge | Досье `knowledge/scout/<домен>-YYYY-MM-DD.md` создано (или существует свежее 30 дней). Хозяин одобрил топ-5 |
 | Knowledge → Build | Knowledge Miner score ≥ 5 |
-| Build → Validate | Все файлы созданы, validate-agent.sh PASS |
-| Validate → Done | Validator score ≥ 80 |
+| Build → Validate | Все файлы созданы (вкл. обёртку `.claude/agents/`), validate-agent.sh PASS |
+| Validate → Wire | Validator score ≥ 80 И smoke-миссия пройдена |
+| Wire → Done | Обёртка в `.claude/agents/` существует, агент позвался по имени из чистой сессии |
 | Iterate | Макс 2 раунда, delta < 5 → стоп |
 
 Детальные критерии: `references/quality-gates.md`
@@ -131,8 +160,11 @@ Input: "Создай агента-копирайтера для Telegram-кан�
   audience/audience-research.md, 5 постов-примеров → score 8
 → BUILD: Builder создал CLAUDE.md 84 строки + 3 скилла,
   использовал examples/copywriter-v1.md как few-shot
-→ VALIDATE: validate-agent.sh → 2 warnings. Validator → score 85 PASS
-→ WIRE: добавлен в AGENTS.md, handoff от Director
+→ VALIDATE: validate-agent.sh → 2 warnings. Validator → score 85.
+  Smoke: «напиши пост про запуск» → ответ в формате output contract. PASS
+→ WIRE: обёртка .claude/agents/copywriter.md (tools, memory: project),
+  добавлен в AGENTS.md, handoff от Director.
+  Приёмка: новая сессия → «копирайтер, черновик поста» → поднялся субагент ✓
 ```
 
 ## Пример (TEAM)

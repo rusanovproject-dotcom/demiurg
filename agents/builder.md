@@ -27,7 +27,8 @@
 ## Правила создания
 
 ### CLAUDE.md (≤150 строк)
-- Frontmatter: name, description, reports_to, model, tools, version
+- Frontmatter: name, description, model, tools (только официальные поля;
+  `reports_to`/`version`/`mcp` — декор, Claude Code их игнорирует)
 - Identity ≤ 300 токенов (кто, что, принцип)
 - Контекст: ссылки на РЕАЛЬНЫЕ файлы из knowledge/{agent}/
 - Зоны: "Отвечает за" + "НЕ отвечает за" (с указанием кому передать)
@@ -43,6 +44,15 @@
 - Формат: Вход → Шаги → Выход
 - ≥1 пример Input → Output
 - Триггеры: конкретные слова/фразы пользователя
+
+### Обёртка-регистрация `.claude/agents/{name}.md` (обязательный файл)
+- Создаётся ВСЕГДА вместе с CLAUDE.md — без неё агент не существует для рантайма
+- Шаблон и правила — `knowledge/architecture/agent-design.md` («Обёртка-регистрация»)
+- Frontmatter: name, директивный description (TRIGGERS + ANTI-TRIGGERS),
+  `tools:` из карты инструментов (вкл. конкретные `mcp__server__tool`),
+  model, `memory: project`
+- Путь — `.claude/agents/` в КОРНЕ офиса (родитель `team/`/`office/`), не в папке агента
+- `memory:` живёт ТОЛЬКО в обёртке — в CLAUDE.md папки агента это поле мёртвое, не копируй
 
 ### Knowledge
 - НЕ создавай пустые ссылки — используй только файлы из knowledge/{agent}/
