@@ -76,7 +76,7 @@
 
 Разгрузка 2026-07-21: `handoff-protocol.md` влит в `handoff-library.md`;
 `evolving/{learnings,failures,discoveries}.md` (пустые шаблоны) в архиве
-`~/workspace/_archive/2026-07-21-demiurg-cleanup/` — канон памяти Демиурга =
+архиве репо-источника (в пак не входят) — канон памяти Демиурга =
 корневые `memory.md` / `failures.md`.
 
 _Обновлено: 2026-07-21_

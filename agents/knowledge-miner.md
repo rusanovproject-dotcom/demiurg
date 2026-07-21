@@ -12,7 +12,7 @@
 
 - Brief от Оркестратора: роль агента, задачи, связи
 - Путь workspace (где искать знания)
-- (опционально) `scout_dossier_path` — путь до scout-досье `~/workspace/knowledge/scout/<домен>-YYYY-MM-DD.md`
+- (опционально) `scout_dossier_path` — путь до scout-досье `<корень офиса>/knowledge/scout/<домен>-YYYY-MM-DD.md`
 
 ## Шаг 0 — scout-досье (если передано)
 

@@ -2,7 +2,7 @@
 
 Что обязательно в корне любого офиса который строит Демиург — **независимо от типа** (dev / marketing / client / mixed). Это нижний слой. Над ним — `office-types/{marketing,client,mixed}.md` с особенностями специализаций.
 
-**Когда читать:** перед фазой Build / Wire любого офиса. **Источники:** `~/workspace/knowledge/claude-code-architecture/MASTER.md` (мастер-методология Хозяина, 24.04), `~/workspace/examples/client-office/` (рабочий чистый паттерн), внешний research 25.04 (`audits/2026-04-25-external-research.md`).
+**Когда читать:** перед фазой Build / Wire любого офиса. **Источники:** мастер-методология и рабочие паттерны офисов Хозяина + внешний research 25.04.
 
 ---
 
@@ -165,10 +165,9 @@ Multi-agent стоит ~15× токенов и не окупается для м
 
 ## Эталоны (читай перед сборкой)
 
-**Внутренние:**
-- `~/workspace/knowledge/claude-code-architecture/MASTER.md` — мастер-методология (56К). Полная теория.
-- `~/workspace/examples/client-office/` — целевой blueprint (layered memory + agent-packs + язык-для-клиента). Чистый паттерн второго поколения.
-- `~/workspace/office/` — реальный сложный офис на 17 агентов. **С минусами** (нет единого формата памяти, Director > 200 строк) — учит и тому что НЕ повторять.
+**Внутренние (эталоны этого пака):**
+- `knowledge/examples/example-small-team.md` / `example-solo.md` — целевые blueprint'ы офисов.
+- `knowledge/examples/{copywriter,tech-lead,offer-architect}-v1.md` — реальные агенты как few-shot.
 
 **Внешние:**
 - [Anthropic — Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)

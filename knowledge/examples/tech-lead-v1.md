@@ -7,7 +7,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 ## Context Pack
-- always:    ~/workspace/my-project/ops/context.md
+- always:    <офис>/ops/context.md
 - domain:    — (читает код из репозитория по задаче)
 - on_demand: по задаче
 

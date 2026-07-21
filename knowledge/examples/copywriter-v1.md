@@ -7,9 +7,9 @@ tools: Read, Grep, Glob, Write, Edit
 ---
 
 ## Context Pack
-- always:    ~/workspace/my-project/ops/context.md
-- domain:    ~/workspace/knowledge/brand/voice.md
-- on_demand: ~/workspace/knowledge/audience/audience-research.md
+- always:    <офис>/ops/context.md
+- domain:    <офис>/knowledge/brand/voice.md
+- on_demand: <офис>/knowledge/audience/audience-research.md
 
 ## Память (канон: промпт просит — хук/харнесс гарантирует)
 1. Перед работой — прочитай MEMORY.md (харнесс сам инжектит её через поле `memory: project` в обёртке `.claude/agents/`; в этом single-file формате поле стоит прямо тут).

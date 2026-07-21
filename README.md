@@ -53,7 +53,7 @@ claude
 ### Вариант 2 — Демиург внутри своего workspace
 
 ```bash
-cd ~/workspace
+cd <корень твоего офиса>
 git clone <url> demiurg
 ```
 

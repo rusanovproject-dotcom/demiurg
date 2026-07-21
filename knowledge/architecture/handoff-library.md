@@ -196,7 +196,7 @@ context_pack:
   files:
     - knowledge/architecture/agent-design.md
     - knowledge/examples/{closest-type}.md
-  scout_dossier_path: ~/workspace/knowledge/scout/{domain}-{date}.md
+  scout_dossier_path: <корень офиса>/knowledge/scout/{domain}-{date}.md
 limits:
   max_tools_calls: 50
   max_duration_min: 15
