@@ -75,3 +75,13 @@ Knowledge Miner → Builder → validate-agent.sh → Validator → Refiner (е�
 | Поиск, сканирование | sonnet | Механическая работа |
 | Создание, оценка | opus | Требует judgment |
 | Фиксы по инструкциям | sonnet | Конкретные правки |
+
+## CustDev-пара (углублённый Intake — по запросу Хозяина)
+
+### Interviewer (`agents/interviewer.md`, opus)
+Глубинное интервью Хозяина: боли, язык, сценарии. Выход — транскрипт-конспект
+для Persona Builder. Opus — интервью требует живой адаптации вопросов.
+
+### Persona Builder (`agents/persona-builder.md`, sonnet)
+Из конспекта интервью — характер/душа агента (архетип, тон, фразы-маркеры,
+«никогда не скажет»). Выход — секция «Характер» + soul-слой.

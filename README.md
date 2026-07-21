@@ -1,9 +1,9 @@
 # Demiurg — архитектор AI-систем
 
-Демиург собирает AI-агентов и AI-офисы как **системы вокруг знаний**, а не клоны шаблонов. Один скилл, два режима, восемь фаз, своя память.
+Демиург собирает AI-агентов и AI-офисы как **системы вокруг знаний**, а не клоны шаблонов. Один скилл, два режима, конвейер фаз (схема ниже), своя память.
 
 ```
-INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE
+INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ)
 ```
 
 ---
@@ -13,19 +13,20 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
 ```
 demiurg/
 ├── CLAUDE.md             # точка входа, self-trigger rules, характер
-├── AGENTS.md             # реестр субагентов и конвейер
-├── MEMORY.md             # шаблон памяти между сессиями
-├── agents/               # 9 субагентов (Knowledge Miner, Builder, Validator, Refiner...)
+├── memory.md             # память Демиурга между сессиями (append-only)
+├── agents/               # 9 субагентов (INDEX.md — список; канон в skills/build/SKILL.md)
 ├── skills/
-│   ├── build/            # единый скилл сборки (SINGLE / TEAM)
-│   └── audit-project/    # универсальный аудит существующего офиса
+│   ├── build/            # единый скилл сборки (SINGLE / TEAM) — канон конвейера
+│   ├── adapt-employee/   # адаптация существующего агента
+│   ├── agent-presentation/  agent-quality-reviewer/  knowledge-alchemist/  knowledge-extractor/
+│   └── (аудит офиса — зона Риты /office-cleaner, у Демиурга снят 2026-07-21)
 ├── knowledge/
 │   ├── architecture/     # 18+ файлов: blueprint, memory, routing, handoff, director-cookbook...
 │   ├── tactics/          # guardrails, validation, context-economy, debug-playbook
 │   ├── examples/         # few-shot: copywriter / tech-lead / wizard / solo / team / offer-architect
 │   ├── templates/        # office-tour, quick-start, user-guide, office-passport
 │   ├── skill-mastery/    # anatomy / writing-guide / advanced-patterns / evaluation
-│   ├── evolving/         # learnings / failures / discoveries / audit-lessons (твоя память)
+│   ├── evolving/         # audit-lessons (уроки аудитов; память Демиурга — корневые memory.md / failures.md)
 │   ├── offer-principles.md
 │   └── cheat-sheet.md
 └── scripts/
@@ -69,29 +70,14 @@ cd demiurg && claude
 
 Триггеры: `создай агента`, `один скилл`, `добавь агента`.
 
-```
-INTAKE (5-6 вопросов одним сообщением)
-  ↓
-BRIEF (роль, задачи, связи)
-  ↓
-SCOUT (мировой топ по домену → knowledge/scout/)
-  ↓
-KNOWLEDGE MINING (что есть в твоём workspace, score 0-10)
-  ↓
-BUILD (Builder создаёт CLAUDE.md + skills/)
-  ↓
-VALIDATE (validate-agent.sh + Validator-субагент, score 0-100)
-  ↓
-ITERATE (если score 60-79 — Refiner, макс 2 раунда)
-  ↓
-WIRE (обновить AGENTS.md, прописать handoff)
-```
+`INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ)` —
+единственное каноническое описание фаз и гейтов: `skills/build/SKILL.md`.
 
 ### Целая команда — режим TEAM (45-90 мин)
 
 Триггеры: `собери команду`, `wizard`, `офис с нуля`.
 
-Wizard ведёт через intake → blueprint → состав команды → для каждого агента: knowledge → build → validate → iterate → финальный wire + soul + onboarding.
+Wizard ведёт через intake → blueprint → состав команды → для каждого агента: scout → adopt → knowledge → build → validate (eval) → iterate → финальный wire + soul + onboarding.
 
 ---
 
@@ -102,7 +88,7 @@ Wizard ведёт через intake → blueprint → состав команд�
 3. **Score < 5 = блокер.** Программный, в `_score.json`. Текстовый блокер модель игнорирует.
 4. **Self-trigger rules — хардкоды.** Если условие выполнено — действие обязательно. Без интерпретации.
 5. **Validator + validate-agent.sh.** Бесплатная проверка ловит 80% проблем без LLM.
-6. **Память живёт в `knowledge/evolving/`.** После каждой сборки — учись.
+6. **Память Демиурга — корневые `memory.md`/`failures.md`; собранным агентам — поле `memory:` в обёртке + страховочный хук** (канон `knowledge/architecture/memory-architecture.md`).
 
 ---
 
@@ -110,7 +96,7 @@ Wizard ведёт через intake → blueprint → состав команд�
 
 В `knowledge/examples/` — образцы агентов с абстрактными именами проектов (`my-app`, `my-project`, `my-bot`). Не копируй пути дословно — это шаблон структуры, не готовый агент.
 
-`MEMORY.md`, `knowledge/evolving/*` — пустые шаблоны. Заполняй своими решениями, паттернами, ошибками.
+`memory.md`/`failures.md` — заполняются по ходу работы (append-only).
 
 ---
 

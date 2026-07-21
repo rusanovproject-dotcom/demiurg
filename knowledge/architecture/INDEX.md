@@ -24,7 +24,7 @@ L2 файлы knowledge. Грузить **по триггеру задачи**, 
 |------|-----------------|
 | `routing-patterns.md` | **При проектировании Director'а или связей** — hub-and-spoke vs peer-to-peer, 5 секций Director'а, 4 стратегии контекста, точки входа задач, anti-patterns |
 | `handoff-library.md` | **При создании любого handoff'а** — yaml-шаблоны (Director→Specialist, parallel fan-out, peer-to-peer, report-back, intake, subagent, cron, validator) |
-| `handoff-protocol.md` | Старый файл — общий формат Task Brief (дополняется handoff-library.md) |
+| — | `handoff-protocol.md` влит в `handoff-library.md` (2026-07-21): протокол исполнения, формат результата, эскалация |
 
 ## По теме «Director как first-class агент»
 

@@ -29,6 +29,7 @@
    - Что НЕ трогать?
    - Планируются ли агенты-боты в Telegram? (нет ответа → рантайм всех агентов
      по умолчанию = субагент Claude Code)
+
 4. Checkpoint → `demiurg-state.json`
 
 ## Фаза 2 — BLUEPRINT
@@ -70,6 +71,8 @@
 3. Builder создаёт CLAUDE.md + skills/
 4. validate-agent.sh → Validator
 5. Score < 80 → Refiner → re-validate (макс 2 раунда)
+6. Behavior-eval (smoke + discovery + recall, `references/behavior-eval.md`) + обёртка
+   `.claude/agents/<name>.md` — цикл на агента тот же, что в SINGLE (scout/adopt — Фаза 3.5)
 
 ## Фаза 5 — WIRING + GRAND REVEAL
 

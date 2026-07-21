@@ -26,7 +26,7 @@
 | Knowledge Mining | `knowledge/architecture/data-packs.md` |
 | Wiring | `knowledge/tactics/validation.md` + `knowledge/architecture/component-checklists.md` |
 | Soul Layer | Creator: `~/workspace/knowledge/agents/strategic/creator.md` |
-| Onboarding | `knowledge/templates/` + `knowledge/architecture/handoff-protocol.md` |
+| Onboarding | `knowledge/templates/` + `knowledge/architecture/handoff-library.md` |
 
 ## Examples (few-shot)
 

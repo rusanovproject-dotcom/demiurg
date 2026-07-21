@@ -2,7 +2,7 @@
 name: build
 description: >
   Единый скилл сборки AI-систем. Два режима: single (один агент) и team (AI-офис).
-  Ядро процесса: Knowledge Mining → Build → Validate → Iterate.
+  Ядро процесса: Scout → Adopt → Knowledge → Build → Validate (eval) → Wire.
   Агент строится ВОКРУГ знаний, а не знания подгоняются под шаблон.
   MANDATORY TRIGGERS: собери, создай агента, пересобери, build, новый агент,
   AI-офис, команду, wizard, heavy, light, пересобрать.
@@ -30,10 +30,11 @@ TEAM — AI-офис с нуля (wizard + интервью)
 
 ## Ядро процесса (для ОБОИХ режимов)
 
-Каждый агент проходит 8 этапов. БЕЗ ИСКЛЮЧЕНИЙ. Порядок задаётся стрелками — без номеров.
+Каждый агент проходит все фазы схемы. БЕЗ ИСКЛЮЧЕНИЙ (единственная оговорка —
+ТГ-only рантайм, см. WIRE). Порядок задаётся стрелками — без номеров.
 
 ```
-INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE
+INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ)
 ```
 
 - **INTAKE** — 6-7 уточняющих вопросов Хозяину одним сообщением → ответ одним сообщением
@@ -49,6 +50,13 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
    - Мировой топ: люди, методологии, публичные скиллы/промпты, MCP, prompt-engineering, reference
    - Multi-signal scoring → тиры S/A/B
    - ОБЯЗАТЕЛЬНО перед Knowledge Mining. Исключение: есть досье свежее 30 дней → используй его
+- **ADOPT** (после одобрения топ-5 Хозяином) — найденное тиров S/A РЕАЛЬНО ставится:
+   - скиллы: `npx skills add <owner/repo>` в папку офиса
+   - MCP: `claude mcp add <server> ...` (scope project)
+   - установленное грантится агенту: конкретные `mcp__<server>__<tool>` → в карту
+     инструментов BUILD → в `tools:` обёртки
+   - в досье фиксируется: что поставлено, что отклонено и почему.
+   Scout без ADOPT = фаза-декорация (0 досье за жизнь Демиурга — урок аудита 2026-07).
 - **KNOWLEDGE** — Knowledge Miner сканирует workspace → knowledge/{agent}/ (учитывает scout-досье)
    - Score < 5 = БЛОКЕР (нет данных → нет агента)
    - Score ≥ 5 → продолжаем
@@ -65,9 +73,14 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
    - Score 60-79 = NEEDS WORK → Refiner фиксит → re-validate
    - Score ≥ 80 = PASS по статике
    - **Smoke-миссия:** дай собранному агенту одну реальную задачу его роли через
-     Agent tool. Ответ мимо output contract или падение → NEEDS WORK.
+     Agent tool. Ответ мимо output contract → NEEDS WORK (Refiner); падение, отказ
+     без причины или свободное эссе → назад в BUILD (пересборка).
      **Нет пройденного smoke → нет WIRE.** Статический score ≥ 80 при проваленном
      smoke = НЕ PASS (оцениваем результат, не структуру)
+   - **Полный поведенческий eval** (3 теста, механика: `references/behavior-eval.md`):
+     smoke → discovery-тест триггеринга (5 своих / 3 чужих фразы) → golden-set памяти
+     + recall-probe. Провал: smoke → BUILD; discovery → правка description обёртки;
+     recall → правка контуров памяти
 - **ITERATE** — если NEEDS WORK, макс 2 раунда (BUILD→VALIDATE)
 - **WIRE** — Демиург сам, три обязательных действия:
    1. **Регистрация:** проверить/дочинить обёртку `.claude/agents/<name>.md` (создана
@@ -83,6 +96,14 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
    3. **Приёмка регистрации:** из ЧИСТОЙ сессии позвать агента по имени — должен
       подняться субагент (маркер «подключился — [Имя]»), а не отыгрыш роли.
       Не поднялся → агент НЕ готов, вернись к п.1.
+   *Оговорка ТГ-only рантайма:* обёртка опциональна, Wire-приёмка заменяется
+   принятым DEPLOY-HANDOFF-брифом (см. фазу ниже и гейт Wire → Done).
+- **DEPLOY-HANDOFF** (только если INTAKE-ответ «где живёт» = ТГ-бот или оба) —
+  Демиург НЕ деплоит. Собирает бриф Гефесту и передаёт в `/deploy-agent`:
+  имя агента · путь мозга (самодостаточная папка БЕЗ относительных путей наружу) ·
+  output contract с фенс-блоком ```memory``` · предложение allowlist инструментов ·
+  уникальный TMUX_SESSION_PREFIX. Для ТГ-рантайма обязателен мозг-репо, обёртка
+  `.claude/agents/` — по желанию (для параллельной жизни субагентом).
 
 **Зачем SCOUT перед KNOWLEDGE:** scout = внешний research (мировой топ по домену), knowledge = внутренний (что уже есть в workspace). Если собираем агента без знания мирового топа — теряем качество на старте. Scout закрывает эту дыру за ~10-15 минут.
 
@@ -97,9 +118,19 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
 | Refiner | `agents/refiner.md` | sonnet | Iterate — фиксы по issues |
 
 Для TEAM-режима дополнительно:
+
+| Субагент | Файл | Модель | Когда |
+|----------|------|--------|-------|
 | Researcher | `agents/researcher.md` | sonnet | Разведка — best practices |
 | Auditor | `agents/auditor.md` | sonnet | Разведка — аудит workspace |
 | Judge | `agents/judge.md` | opus | Финальная оценка системы |
+
+CustDev-пара (углублённый Intake / душа агента):
+
+| Субагент | Файл | Модель | Когда |
+|----------|------|--------|-------|
+| Interviewer | `agents/interviewer.md` | opus | Глубинное интервью Хозяина (по запросу) |
+| Persona Builder | `agents/persona-builder.md` | sonnet | Характер/душа агента после интервью |
 
 ## Knowledge routing
 
@@ -137,12 +168,13 @@ bash scripts/validate-agent.sh /path/to/agent/
 | Этап | Условие перехода |
 |------|-----------------|
 | Intake → Brief | Получены ответы Хозяина на 6-7 вопросов (или явное «без вопросов» / минорная правка) |
-| Brief → Scout | Brief содержит: роль (домен), задачи, связи |
-| Scout → Knowledge | Досье `knowledge/scout/<домен>-YYYY-MM-DD.md` создано (или существует свежее 30 дней). Хозяин одобрил топ-5 |
+| Brief → Scout | Brief содержит: роль (домен), задачи, связи, рантайм |
+| Scout → Adopt | Досье `knowledge/scout/<домен>-YYYY-MM-DD.md` создано (или существует свежее 30 дней). Хозяин одобрил топ-5 |
+| Adopt → Knowledge | Одобренные S/A-находки установлены и внесены в карту инструментов (или явно отклонены с причиной в досье) |
 | Knowledge → Build | Knowledge Miner score ≥ 5 |
 | Build → Validate | Все файлы созданы (вкл. обёртку `.claude/agents/`), validate-agent.sh PASS |
-| Validate → Wire | Validator score ≥ 80 И smoke-миссия пройдена |
-| Wire → Done | Обёртка в `.claude/agents/` существует, агент позвался по имени из чистой сессии |
+| Validate → Wire | Validator score ≥ 80 И behavior-eval 3/3 (smoke + discovery 5/3 + golden-set/recall — `references/behavior-eval.md`) |
+| Wire → Done | Обёртка в `.claude/agents/` существует, агент позвался по имени из чистой сессии. ТГ-only: вместо этого — принятый DEPLOY-HANDOFF-бриф |
 | Iterate | Макс 2 раунда, delta < 5 → стоп |
 
 Детальные критерии: `references/quality-gates.md`

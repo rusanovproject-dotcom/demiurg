@@ -4,11 +4,13 @@
 
 | Этап | Условие перехода | Блокер? |
 |------|-----------------|---------|
-| Brief → Knowledge | Brief: роль + задачи + связи + рантайм (где живёт) | Да |
+| Brief → Scout | Brief: роль + задачи + связи + рантайм (где живёт) | Да |
+| Scout → Adopt | Досье создано (или свежее ≤30 дней), Хозяин одобрил топ-5 | Да |
+| Adopt → Knowledge | S/A-находки установлены и внесены в карту инструментов (или отклонены с причиной) | Да |
 | Knowledge → Build | Miner score ≥ 5 по 5 критериям | Да (score < 5 = СТОП) |
 | Build → Validate | validate-agent.sh PASS (0 errors), обёртка `.claude/agents/` создана | Да |
-| Validate → Wire | Validator score ≥ 80/100 И smoke-миссия пройдена | Нет (iterate) / smoke провален = СТОП |
-| Wire → Done | Обёртка в `.claude/agents/` корня офиса, агент позвался по имени из чистой сессии | Да |
+| Validate → Wire | Validator ≥ 80 И behavior-eval 3/3 (smoke + discovery + recall) | Нет (iterate) / eval провален = СТОП |
+| Wire → Done | Обёртка в `.claude/agents/` корня офиса, агент позвался по имени из чистой сессии (ТГ-only: принятый DEPLOY-HANDOFF-бриф) | Да |
 | Iterate | Макс 2 раунда, delta < 5 → стоп | Hardcoded |
 
 ## Knowledge Miner scoring
@@ -45,9 +47,10 @@
 |---------|---------|
 | Intake → Blueprint | ≥3 ответа, паттерн определён |
 | Blueprint → Team | scaffold выполнен, tree показан |
-| Team → Knowledge Mining | Таблица утверждена, нет пересечений |
+| Team → Scout/Adopt | Таблица утверждена, нет пересечений |
+| Scout/Adopt → Knowledge Mining | Досье по доменам команды, S/A установлено |
 | Knowledge → Build | ВСЕ агенты Miner score ≥ 5 |
-| Build → Wiring | Все агенты Validator ≥ 80 И smoke-миссия пройдена у каждого |
+| Build → Wiring | Все агенты Validator ≥ 80 И behavior-eval пройден у каждого |
 | Wiring → Soul | DRY-RUN 3/3 pass |
 | Soul → Onboarding | Антиклон pass, характеры утверждены |
 | Onboarding → Complete | quick-start + user-guide + First Contact |

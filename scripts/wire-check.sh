@@ -1,9 +1,9 @@
 #!/bin/bash
 # wire-check.sh — Гейт после фазы Wire (последняя фаза конвейера Демиурга).
-# Проверяет: агент прописан в AGENTS.md, handoff-ссылки валидны, нет broken связей с context.md.
+# Проверяет 5 чеков: роутинг-карта (AGENTS.md|team/map.md), обёртка .claude/agents/ (name/description/memory), handoff-эвристика, context.md, overlap зон.
 # Запускать ПОСЛЕ validate-agent.sh + Validator (когда score ≥ 80) перед финальной отдачей.
 # Использование: bash wire-check.sh /path/to/agent/directory [/path/to/office]
-# Exit: 0 если все 4 чека PASS, иначе число ошибок.
+# Exit: 0 если все чеки PASS, иначе число ошибок.
 
 set -uo pipefail
 
@@ -40,25 +40,40 @@ AGENTS_MD="$OFFICE_DIR/AGENTS.md"
 CONTEXT_MD="$OFFICE_DIR/context.md"
 AGENT_CLAUDE_MD="$AGENT_DIR/CLAUDE.md"
 
-# ─── 1. Запись в AGENTS.md ───
+# ─── 1. Запись в роутинг-карте (AGENTS.md или team/map.md — зависит от топологии) ───
+if [[ ! -f "$AGENTS_MD" && -f "$OFFICE_DIR/team/map.md" ]]; then
+  AGENTS_MD="$OFFICE_DIR/team/map.md"
+  blue "Роутинг-карта этой топологии: team/map.md"
+fi
 if [[ ! -f "$AGENTS_MD" ]]; then
-  red "AGENTS.md не найден в $OFFICE_DIR"
+  red "Роутинг-карта не найдена (ни AGENTS.md, ни team/map.md) в $OFFICE_DIR"
   ERRORS=$((ERRORS + 1))
 else
-  if grep -qi "^[[:space:]]*[-*|][[:space:]]*\*\?\*\?$AGENT_NAME\b\|/$AGENT_NAME/\|/$AGENT_NAME\.md\|^# $AGENT_NAME" "$AGENTS_MD" 2>/dev/null \
-     || grep -qi "$AGENT_NAME" "$AGENTS_MD" 2>/dev/null; then
-    green "Запись в AGENTS.md найдена"
+  if grep -qi "^[[:space:]]*[-*|][[:space:]]*\*\?\*\?$AGENT_NAME\b\|/$AGENT_NAME/\|/$AGENT_NAME\.md\|^# $AGENT_NAME" "$AGENTS_MD" 2>/dev/null; then
+    green "Запись в роутинг-карте ($(basename "$AGENTS_MD")) найдена"
+  elif grep -qi "$AGENT_NAME" "$AGENTS_MD" 2>/dev/null; then
+    yellow "Имя '$AGENT_NAME' упомянуто в $(basename "$AGENTS_MD"), но не как строка реестра — проверь глазами"
+    WARNINGS=$((WARNINGS + 1))
   else
-    red "Агент '$AGENT_NAME' не найден в AGENTS.md — забыли вписать"
+    red "Агент '$AGENT_NAME' не найден в роутинг-карте ($(basename "$AGENTS_MD")) — забыли вписать"
     ERRORS=$((ERRORS + 1))
   fi
 fi
 
 # ─── 1b. Обёртка-регистрация в .claude/agents/ (канон 2026-07-20) ───
 WRAPPER="$OFFICE_DIR/.claude/agents/$AGENT_NAME.md"
+# Реестр может жить уровнем выше (топология «office/ = штаб внутри workspace»)
+if [[ ! -f "$WRAPPER" && -f "$OFFICE_DIR/../.claude/agents/$AGENT_NAME.md" ]]; then
+  WRAPPER="$OFFICE_DIR/../.claude/agents/$AGENT_NAME.md"
+  blue "Реестр найден уровнем выше: $WRAPPER"
+fi
 if [[ -f "$WRAPPER" ]]; then
-  if grep -q '^memory:' "$WRAPPER" 2>/dev/null; then
-    green "Обёртка .claude/agents/$AGENT_NAME.md найдена, memory: задан"
+  W_OK=1
+  FM=$(awk '/^---$/{c++; next} c==1' "$WRAPPER")   # только frontmatter (между первыми ---)
+  grep -q '^name:' <<<"$FM" || { red "Обёртка без name: во frontmatter"; ERRORS=$((ERRORS+1)); W_OK=0; }
+  grep -q '^description:' <<<"$FM" || { red "Обёртка без description: — автоделегирование не сработает"; ERRORS=$((ERRORS+1)); W_OK=0; }
+  if grep -q '^memory:' <<<"$FM" 2>/dev/null; then
+    [[ $W_OK -eq 1 ]] && green "Обёртка .claude/agents/$AGENT_NAME.md: name/description/memory на месте"
   else
     red "Обёртка есть, но нет поля memory: — память агента не включена"
     ERRORS=$((ERRORS + 1))
@@ -93,8 +108,9 @@ else
            | sed -E 's/^(передай|to:|handoff to|→)[[:space:]]+//i' | sort -u || true)
 
   if [[ $HANDOFF_BROKEN -gt 0 ]]; then
-    red "Broken handoff: $HANDOFF_BROKEN из $HANDOFF_TOTAL ссылок ведут на несуществующих агентов"
-    ERRORS=$((ERRORS + 1))
+    # Эвристика (regex по «передай/→ Слово») даёт ложные имена — не блокируем, предупреждаем
+    yellow "Возможные broken handoff: $HANDOFF_BROKEN из $HANDOFF_TOTAL — проверь глазами (эвристика)"
+    WARNINGS=$((WARNINGS + 1))
   elif [[ $HANDOFF_TOTAL -gt 0 ]]; then
     green "Handoff-ссылки валидны ($HANDOFF_TOTAL)"
   else
@@ -163,7 +179,7 @@ echo ""
 echo "═══════════════════════════════════════"
 
 if [[ $ERRORS -eq 0 ]] && [[ $WARNINGS -eq 0 ]]; then
-  green "WIRE PASS — все 4 чека прошли"
+  green "WIRE PASS — все чеки прошли"
 elif [[ $ERRORS -eq 0 ]]; then
   yellow "WIRE PASS WITH WARNINGS — $WARNINGS предупреждений"
 else

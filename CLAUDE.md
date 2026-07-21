@@ -14,21 +14,16 @@
 ## Конвейер
 
 ```
-INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE
+INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ)
 ```
 
-- Детали каждой фазы: `skills/build/SKILL.md`
-- Спецификации субагентов: `agents/INDEX.md` и `skills/build/references/subagent-specs.md`
-- Wire = финальная фаза: **проверить обёртку-регистрацию в `.claude/agents/` корня офиса** (создана Builder'ом в BUILD; отсутствует — создать; без неё агент не зовётся по имени) + обновить `office/AGENTS.md` и `office/context.md` (если используешь Демиурга поверх собственного офиса) + handoff-ссылки. Приёмка: агент позвался по имени из чистой сессии
+Единственный канон конвейера (фазы, гейты, субагенты, WIRE-регистрация с приёмкой
+«позвался из чистой сессии») — `skills/build/SKILL.md`. Здесь только схема.
 
 ## Knowledge routing
 
-Канонический минимум перед любой сборкой:
-1. `knowledge/architecture/agent-design.md` — шаблон + гайд + best practices
-2. `knowledge/evolving/audit-lessons.md` — ошибки НЕ повторять
-3. `knowledge/examples/` — few-shot из реальных агентов (один по типу)
-
-Полная таблица по типам задач: `skills/build/references/knowledge-routing.md`
+Канонический минимум перед сборкой — `skills/build/SKILL.md` § Knowledge routing
+(единственный список). Полная таблица по типам задач: `skills/build/references/knowledge-routing.md`
 
 ## Output contract
 
@@ -60,8 +55,9 @@ INTAKE → BRIEF → SCOUT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → 
 | Задача = проектирование Director'а | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/director-cookbook.md` |
 | Задача = проектирование памяти | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/memory-architecture.md` (канон 2026-07-20: трёхконтурная модель; ритуал «сам запишет после задачи» ЗАПРЕЩЁН как единственный механизм) |
 | Фаза WIRE | **ОБЯЗАТЕЛЬНО** обёртка в `.claude/agents/` корня офиса + вызов по имени из чистой сессии. Без этого «готов» не говорить |
+| INTAKE-ответ «жить в Telegram» | **ОБЯЗАТЕЛЬНО** фаза DEPLOY-HANDOFF → бриф Гефесту (`/deploy-agent`). Сам НЕ деплой |
 | Задача = handoff между агентами | **ОБЯЗАТЕЛЬНО** прочитай `knowledge/architecture/handoff-library.md` и используй yaml-шаблон |
-| Запрос = «проверь офис», «наведи порядок» | **ОБЯЗАТЕЛЬНО** запусти `skills/audit-project/SKILL.md`, не делай аудит «по наитию» |
+| Запрос = «проверь офис», «наведи порядок» | НЕ твоя зона — роутинг Рите (`/office-cleaner`). Аудит офиса Демиург не делает |
 | Минорная правка ≤30 строк / 1-2 файла | **НЕ грузи** ничего из knowledge/ — только сам файл и его соседей |
 | Перед фазой Build | **ОБЯЗАТЕЛЬНО** `cat knowledge/{agent}/_score.json`. Если `verdict: BLOCK` → STOP, эскалируй Хозяину |
 | Validator вернул score 60-79 (NEEDS_WORK) | **АВТО** запусти Refiner с issues. **НЕ спрашивай** Хозяина между раундами. Макс 2 раунда. |
