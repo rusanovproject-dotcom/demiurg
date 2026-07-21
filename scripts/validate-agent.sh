@@ -70,7 +70,8 @@ fi
 
 # ─── 4. Примеры Input→Output ───
 CHECKS=$((CHECKS + 1))
-EXAMPLES=$(grep -ci "input\|output\|пример" "$CLAUDE_MD" 2>/dev/null || echo 0)
+EXAMPLES=$(grep -ci "input\|output\|пример" "$CLAUDE_MD" 2>/dev/null | head -1 || true)
+EXAMPLES=${EXAMPLES:-0}
 if [[ $EXAMPLES -ge 2 ]]; then
   green "Примеры найдены ($EXAMPLES упоминаний)"
 else

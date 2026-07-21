@@ -46,16 +46,36 @@ INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → IT
    - Исключения: минорная правка (1-2 файла) ИЛИ Хозяин сказал «без вопросов»
      (тогда рантайм по умолчанию = субагент Claude Code)
 - **BRIEF** — роль, задачи, связи (собирается ИЗ ответов Intake или из team table)
-- **SCOUT** — /scout <домен> → досье в knowledge/scout/<домен>-YYYY-MM-DD.md
+- **SCOUT** — /scout <домен> → досье в `knowledge/scout/` В КОРНЕ офиса
+   (директория с корневым CLAUDE.md офиса; формат `<slug>-YYYY-MM-DD.md`).
+   НЕ в папке Демиурга — путь записи и путь проверки «есть ли досье» обязаны совпадать
+   (урок ревью 2026-07-21: расхождение путей делало ADOPT слепым)
    - Мировой топ: люди, методологии, публичные скиллы/промпты, MCP, prompt-engineering, reference
+   - **Видео-разведка обязательна:** свежие YouTube-разборы (≤12 мес) «как собрать
+     [роль]-агента» / «лучшие MCP для [домена]» — вытащить из роликов реальные стеки
+     инструментов и воркфлоу (детали — skill-scout, категория 4b)
    - Multi-signal scoring → тиры S/A/B
    - ОБЯЗАТЕЛЬНО перед Knowledge Mining. Исключение: есть досье свежее 30 дней → используй его
-- **ADOPT** (после одобрения топ-5 Хозяином) — найденное тиров S/A РЕАЛЬНО ставится:
+- **ADOPT** — обязательный гейт согласования стека. Демиург показывает Хозяину
+   **ADOPT-таблицу** из досье (секция «ADOPT-предложение») и ждёт явного апрува:
+
+   | Инструмент | Тип | Тир | Вердикт | Зачем агенту | Установка |
+   |---|---|---|---|---|---|
+   | aceternity-ui MCP | MCP | S | ставим обязательно | анимированные секции без ручного CSS | `claude mcp add ...` |
+   | frontend-design | skill | S | ставим обязательно | анти-generic дизайн-процесс | `npx skills add ...` |
+   | <нишевый tool> | MCP | B | опционально — спросить | ... | ... |
+   | <слабый tool> | skill | B | отклонено: дублирует X | — | — |
+
+   Вердикты: **ставим обязательно** (без этого агент слабый — Демиург обязан их выделить) /
+   **опционально** (спросить Хозяина) / **отклонено** (с причиной). Хозяин правит вердикты →
+   одобренное РЕАЛЬНО ставится — `bash scripts/adopt.sh <досье>` (сухой прогон),
+   `--apply` ставит «обязательные» и дописывает «ADOPT-итог» в досье; руками то же самое:
    - скиллы: `npx skills add <owner/repo>` в папку офиса
    - MCP: `claude mcp add <server> ...` (scope project)
-   - установленное грантится агенту: конкретные `mcp__<server>__<tool>` → в карту
-     инструментов BUILD → в `tools:` обёртки
-   - в досье фиксируется: что поставлено, что отклонено и почему.
+   - установленное грантится агенту: конкретные `mcp__<server>__<tool>` → в файл-карту
+     `knowledge/{agent}/_toolmap.md` (артефакт, не «в голове») → в `tools:` обёртки (BUILD)
+   - итог фиксируется В ДОСЬЕ: секция «ADOPT-итог» — что поставлено (фактические
+     `mcp__server__tool`), что отклонено и почему.
    Scout без ADOPT = фаза-декорация (0 досье за жизнь Демиурга — урок аудита 2026-07).
 - **KNOWLEDGE** — Knowledge Miner сканирует workspace → knowledge/{agent}/ (учитывает scout-досье)
    - Score < 5 = БЛОКЕР (нет данных → нет агента)
@@ -111,7 +131,7 @@ INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → IT
 
 | Субагент / Скилл | Файл | Модель | Когда |
 |----------|------|--------|-------|
-| Skill Scout | `~/.claude/skills/skill-scout/SKILL.md` (скилл `/scout`) | sonnet | Scout — ПЕРЕД Knowledge Mining |
+| Skill Scout | `skills/scout/SKILL.md` (скилл `/scout`, входит в пак) | sonnet | Scout — ПЕРЕД Knowledge Mining |
 | Knowledge Miner | `agents/knowledge-miner.md` | sonnet | Knowledge Mining — ПЕРЕД сборкой |
 | Builder | `agents/builder.md` | opus | Build — создание файлов |
 | Validator | `agents/validator.md` | sonnet | Validate — проверка |
@@ -139,6 +159,8 @@ CustDev-пара (углублённый Intake / душа агента):
 2. `knowledge/evolving/audit-lessons.md` — ошибки НЕ повторять
 
 **Builder ОБЯЗАН прочитать:**
+- scout-досье текущего агента (`<корень офиса>/knowledge/scout/<slug>-*.md`) + ADOPT-итог
+- `knowledge/{agent}/_toolmap.md` — карта инструментов из ADOPT → источник `tools:` обёртки
 - `knowledge/examples/` — реальные работающие агенты как few-shot
 - `knowledge/architecture/agent-design.md` — шаблон CLAUDE.md
 - `knowledge/skill-mastery/anatomy.md` — шаблон скилла
@@ -169,8 +191,8 @@ bash scripts/validate-agent.sh /path/to/agent/
 |------|-----------------|
 | Intake → Brief | Получены ответы Хозяина на 6-7 вопросов (или явное «без вопросов» / минорная правка) |
 | Brief → Scout | Brief содержит: роль (домен), задачи, связи, рантайм |
-| Scout → Adopt | Досье `knowledge/scout/<домен>-YYYY-MM-DD.md` создано (или существует свежее 30 дней). Хозяин одобрил топ-5 |
-| Adopt → Knowledge | Одобренные S/A-находки установлены и внесены в карту инструментов (или явно отклонены с причиной в досье) |
+| Scout → Adopt | Досье `<корень офиса>/knowledge/scout/<slug>-YYYY-MM-DD.md` создано (или существует свежее 30 дней), в нём есть секция «ADOPT-предложение» с вердиктами |
+| Adopt → Knowledge | ADOPT-таблица показана Хозяину, вердикты получены. Одобренное установлено и внесено в `knowledge/{agent}/_toolmap.md` (или явно отклонено с причиной в досье, секция «ADOPT-итог») |
 | Knowledge → Build | Knowledge Miner score ≥ 5 |
 | Build → Validate | Все файлы созданы (вкл. обёртку `.claude/agents/`), validate-agent.sh PASS |
 | Validate → Wire | Validator score ≥ 80 И behavior-eval 3/3 (smoke + discovery 5/3 + golden-set/recall — `references/behavior-eval.md`) |
@@ -185,9 +207,11 @@ bash scripts/validate-agent.sh /path/to/agent/
 Input: "Создай агента-копирайтера для Telegram-канала"
 
 → BRIEF: копирайтер, посты/рассылки/крео, стиль Хозяина
-→ SCOUT: /scout копирайтер → knowledge/scout/копирайтер-YYYY-MM-DD.md
-  (Hormozi, Sugarman, Schwartz, Halbert + leaked prompts + awesome-lists).
-  Хозяин одобрил топ-5.
+→ SCOUT: /scout копирайтер → <корень офиса>/knowledge/scout/копирайтер-YYYY-MM-DD.md
+  (Hormozi, Sugarman, Schwartz, Halbert + leaked prompts + awesome-lists + 2 YouTube-разбора
+  «AI copywriting agent stack»).
+→ ADOPT: показал таблицу — 2 обязательных (skill hot-trail-аналог, MCP notion), 1 опционально,
+  2 отклонено. Хозяин одобрил → поставил, записал в _toolmap.md и «ADOPT-итог» досье.
 → KNOWLEDGE: Miner нашёл brand/voice.md (563 строки стиля),
   audience/audience-research.md, 5 постов-примеров → score 8
 → BUILD: Builder создал CLAUDE.md 84 строки + 3 скилла,
