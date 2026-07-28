@@ -13,28 +13,40 @@ INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → IT
 ```
 demiurg/
 ├── CLAUDE.md             # точка входа, self-trigger rules, характер
-├── memory.md             # память Демиурга между сессиями (append-only)
+├── MEMORY.md             # память Демиурга между сессиями (append-only)
 ├── agents/               # 9 субагентов (INDEX.md — список; канон в skills/build/SKILL.md)
-├── skills/
-│   ├── build/            # единый скилл сборки (SINGLE / TEAM) — канон конвейера
-│   ├── adapt-employee/   # адаптация существующего агента
-│   ├── agent-presentation/  agent-quality-reviewer/  knowledge-alchemist/  knowledge-extractor/
-│   └── (аудит офиса — зона Риты /office-cleaner, у Демиурга снят 2026-07-21)
+├── skills/               # 7 скиллов — см. таблицу ниже
 ├── knowledge/
 │   ├── architecture/     # 18+ файлов: blueprint, memory, routing, handoff, director-cookbook...
 │   ├── tactics/          # guardrails, validation, context-economy, debug-playbook
 │   ├── examples/         # few-shot: copywriter / tech-lead / wizard / solo / team / offer-architect
 │   ├── templates/        # office-tour, quick-start, user-guide, office-passport
 │   ├── skill-mastery/    # anatomy / writing-guide / advanced-patterns / evaluation
-│   ├── evolving/         # audit-lessons (уроки аудитов; память Демиурга — корневые memory.md / failures.md)
+│   ├── scout/            # досье разведки доменов (складывается по ходу работы)
+│   ├── evolving/         # audit-lessons (уроки аудитов; память Демиурга — корневой MEMORY.md)
 │   ├── offer-principles.md
 │   └── cheat-sheet.md
 └── scripts/
     ├── validate-agent.sh   # бесплатная проверка одного агента (без LLM)
     ├── validate.sh         # health-check директории (6 проверок)
     ├── validate-office.sh  # проверка офиса целиком
+    ├── adopt.sh            # перенос чужого агента/скилла к себе (фаза ADOPT)
     └── wire-check.sh       # финальная проверка перед "готов"
 ```
+
+### Скиллы
+
+| Скилл | Что делает | Когда звать |
+|-------|-----------|-------------|
+| `build` | Единый скилл сборки, режимы SINGLE / TEAM / TRAIN — канон конвейера | Создать агента, скилл или целый офис |
+| `scout` | Разведка домена перед сборкой: люди, методологии, готовые скиллы, MCP | Перед сборкой в незнакомой теме |
+| `knowledge-alchemist` | Сырой контент (транскрипт, книга, курс) → готовый агент со вшитой методологией | Есть материал, из которого нужен специалист |
+| `knowledge-extractor` | Сырой контент → структурированная база знаний офиса (без сборки агента) | Нужны знания, не агент |
+| `adapt-employee` | Готовый агент → адаптирован под другой офис (голос, проводка, чистка чужих данных) | Переносишь агента себе или клиенту |
+| `agent-quality-reviewer` | Ревью качества агента по 8 измерениям, оценка 0-100 + pre-publish гейт комплектности | Перед запуском агента и **обязательно** перед публикацией пака |
+| `agent-presentation` | Онбординг-презентация агента: HTML, 17-18 слайдов с интерактивом | Показать агента ученикам или клиенту |
+
+Аудит офиса целиком — не зона Демиурга, это отдельный агент-хранитель (`/office-cleaner`), снят отсюда 21.07.2026.
 
 ---
 
