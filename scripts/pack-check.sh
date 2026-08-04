@@ -136,7 +136,15 @@ if [ -n "$PERSONAL_NAMES" ]; then
     for n in $(echo "$PERSONAL_NAMES" | tr ',' '\n'); do
         n=$(echo "$n" | sed 's/^ *//; s/ *$//')
         [ -z "$n" ] && continue
-        HITS=$(grep -rl "$n" . --include="*.md" --exclude-dir=.git 2>/dev/null | head -10)
+        # Регистр обязателен: имя в тексте бывает капсом («РУСАНОВ БИОХАКИНГ»),
+        # и точное совпадение его не видит. Без -i гейт молча отдавал «чисто»,
+        # а имя уезжало в публичный репозиторий.
+        # Плюс страховка: BSD-grep на части систем не сворачивает регистр для
+        # кириллицы даже с -i, поэтому явно добавляем капс и Title-вариант.
+        N_UP=$(printf '%s' "$n" | tr '[:lower:]' '[:upper:]')
+        N_LO=$(printf '%s' "$n" | tr '[:upper:]' '[:lower:]')
+        HITS=$(grep -rlE -i -e "$n" -e "$N_UP" -e "$N_LO" . \
+                 --include="*.md" --exclude-dir=.git 2>/dev/null | head -10)
         if [ -n "$HITS" ]; then
             block "личное имя '$n' осталось в паке (в скиллах пиши обезличенно):"
             echo "$HITS" | sed 's/^/      /'
