@@ -165,7 +165,7 @@ blocker:
 ↓
 Director: классификация
 - Tier: 2 (контент)
-- Проект: Project X
+- Проект: пример продукта
 - Агент: Frontend Designer
 - Статус: A+ Task ещё открыта → лендинг в бэклог
 ↓
@@ -196,7 +196,7 @@ context_pack:
   files:
     - knowledge/architecture/agent-design.md
     - knowledge/examples/{closest-type}.md
-  scout_dossier_path: <корень офиса>/knowledge/scout/{domain}-{date}.md
+  scout_dossier_path: <корень-офиса>/knowledge/scout/{domain}-{date}.md
 limits:
   max_tools_calls: 50
   max_duration_min: 15
@@ -207,7 +207,7 @@ limits:
 
 ## Шаблон 7: Cron / Background → Director
 
-Ночная команда, scheduled tasks, Atlas notifications.
+Ночная команда, scheduled tasks, Director notifications.
 
 ```yaml
 from: cron-night-crew

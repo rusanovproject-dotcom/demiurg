@@ -3,7 +3,7 @@
 Демиург собирает AI-агентов и AI-офисы как **системы вокруг знаний**, а не клоны шаблонов. Один скилл, два режима, конвейер фаз (схема ниже), своя память.
 
 ```
-INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ)
+INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ) → ФИЧИ (по запросу)
 ```
 
 ---
@@ -15,7 +15,7 @@ demiurg/
 ├── CLAUDE.md             # точка входа, self-trigger rules, характер
 ├── MEMORY.md             # память Демиурга между сессиями (append-only)
 ├── agents/               # 9 субагентов (INDEX.md — список; канон в skills/build/SKILL.md)
-├── skills/               # 7 скиллов — см. таблицу ниже
+├── skills/               # 8 скиллов — см. таблицу ниже
 ├── knowledge/
 │   ├── architecture/     # 18+ файлов: blueprint, memory, routing, handoff, director-cookbook...
 │   ├── tactics/          # guardrails, validation, context-economy, debug-playbook
@@ -40,6 +40,7 @@ demiurg/
 |-------|-----------|-------------|
 | `build` | Единый скилл сборки, режимы SINGLE / TEAM / TRAIN — канон конвейера | Создать агента, скилл или целый офис |
 | `scout` | Разведка домена перед сборкой: люди, методологии, готовые скиллы, MCP | Перед сборкой в незнакомой теме |
+| `interview` | Уточняет крупный размытый запрос и сохраняет SPEC.md | Перед сборкой, когда требований мало |
 | `knowledge-alchemist` | Сырой контент (транскрипт, книга, курс) → готовый агент со вшитой методологией | Есть материал, из которого нужен специалист |
 | `knowledge-extractor` | Сырой контент → структурированная база знаний офиса (без сборки агента) | Нужны знания, не агент |
 | `adapt-employee` | Готовый агент → адаптирован под другой офис (голос, проводка, чистка чужих данных) | Переносишь агента себе или клиенту |
@@ -55,7 +56,7 @@ demiurg/
 ### Вариант 1 — Демиург как отдельный проект (рекомендую)
 
 ```bash
-git clone <url> demiurg
+git clone https://github.com/rusanovproject-dotcom/demiurg.git demiurg
 cd demiurg
 claude
 ```
@@ -66,7 +67,7 @@ claude
 
 ```bash
 cd <корень твоего офиса>
-git clone <url> demiurg
+git clone https://github.com/rusanovproject-dotcom/demiurg.git demiurg
 ```
 
 Из любого места в workspace зови Демиурга:
@@ -82,7 +83,7 @@ cd demiurg && claude
 
 Триггеры: `создай агента`, `один скилл`, `добавь агента`.
 
-`INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ)` —
+`INTAKE → BRIEF → SCOUT → ADOPT → KNOWLEDGE → BUILD → VALIDATE → ITERATE → WIRE (→ DEPLOY-HANDOFF, если ТГ) → ФИЧИ (по запросу)` —
 единственное каноническое описание фаз и гейтов: `skills/build/SKILL.md`.
 
 ### Целая команда — режим TEAM (45-90 мин)
@@ -173,8 +174,14 @@ python3 scripts/context-budget.py <путь-к-агенту>
 
 ## Известное
 
-`bash scripts/validate.sh .` из коробки покажет ~100 broken links — это ссылки на `office/agents/*` живого офиса, в который Демиург обычно встроен. Когда подключишь Демиурга к своему workspace или соберёшь первый офис — ссылки заработают по своим местам.
+Для проверки самого публичного пакета запускай `bash scripts/pack-check.sh . --names "имена,которые-нельзя-публиковать"`. `scripts/validate.sh` проверяет **собранный агент или офис**: на папке самого Демиурга он считает шаблонные пути к ещё не созданным файлам ошибками.
 
 ## Лицензия
 
 MIT
+
+## Внешние инструменты и примеры
+
+`/skill-creator` — отдельный инструмент платформы для разработки самостоятельных скиллов; основной конвейер Демиурга работает через `skills/build/`. `/office-cleaner`, `/custdev`, `/forge`, `/learn`, `/ingest-expert`, `/wiki-ingest` и прочие slash-команды в примерах относятся к внешним агентам или демонстрационным офисам. Они не требуются для запуска Демиурга. Перед установкой найденных публичных скиллов и MCP проверь лицензию и доступность.
+
+Примеры интеграций в скиллах (`/angle-shift`, `/audience-stage`, `/designer-build`, `/jtbd`, `/research-brief`, `/save-to-hub`, `/segments-discover`, `/smart-rewrite`, `/stop-slop`, `/style-switch`, `/submit`, `/update-office`, `/voice-dna`) относятся к возможным скиллам других офисов. Они не входят в этот пакет. `/api` в примере обозначает путь интерфейса сервиса.

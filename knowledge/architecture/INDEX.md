@@ -45,7 +45,7 @@ L2 файлы knowledge. Грузить **по триггеру задачи**, 
 |------|-----------------|
 | `office-types/marketing.md` | **При сборке marketing-офиса** — 6 ролей, brand-as-validator, memory особенности, ROI-чек |
 | `office-types/client.md` | **При сборке client-офиса** — 7 ролей, long-running memory, trust boundaries, proactivity |
-| `office-types/mixed.md` | **При сборке mixed-офиса (Нейроштаб, гибрид)** — pod-decomposition, переcечения зон, 3 namespace памяти |
+| `office-types/mixed.md` | **При сборке mixed-офиса (маркетинг + продажи + продукт)** — pod-decomposition, переcечения зон, 3 namespace памяти |
 
 ## Структуры и lifecycle
 
@@ -98,7 +98,7 @@ L2 файлы knowledge. Грузить **по триггеру задачи**, 
   - office-types/client.md
   - memory-architecture.md (bi-temporal)
 
-"гибрид" / "Нейроштаб" / "разные домены вместе":
+"гибрид" / "разные домены вместе":
   - office-blueprint.md
   - office-types/mixed.md
 

@@ -25,7 +25,7 @@
 | Team Design | `knowledge/architecture/context-patterns.md` |
 | Knowledge Mining | `knowledge/architecture/data-packs.md` |
 | Wiring | `knowledge/tactics/validation.md` + `knowledge/architecture/component-checklists.md` |
-| Soul Layer | Creator (внешний спец Хозяина; без него Soul-фаза опциональна) |
+| Soul Layer | Демиург: фаза SOUL из `references/wizard-phases.md` |
 | Onboarding | `knowledge/templates/` + `knowledge/architecture/handoff-library.md` |
 
 ## Examples (few-shot)

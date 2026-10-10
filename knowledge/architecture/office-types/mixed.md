@@ -1,8 +1,8 @@
-# Mixed-офис — Гибрид (Нейроштаб как референс)
+# Mixed-офис — пример структуры
 
 Mixed-офис = **marketing + client + product одновременно**. Самый сложный паттерн. Главная опасность — **пересечение зон** между marketing- и sales-агентами. Главный спасатель — **pod-decomposition**: > 8 агентов разбивай на под-команды со своими Director-lite.
 
-**Источники:** ext research A2 (Anthropic 4×4 > 1×8), B3 (hierarchical teams), `office/AGENTS.md` (Нейроштаб как живой mixed-офис на 17 агентов).
+**Источники:** ext research A2 (Anthropic 4×4 > 1×8), B3 (hierarchical teams), обезличенный пример офиса с 17 агентами.
 
 ---
 
@@ -30,7 +30,7 @@ Mixed-офис = **marketing + client + product одновременно**. Са
 ### 3. Director marketing vs Director client vs Director product
 Если **один Director делает всё**, он перегружен, делегирует хаотично, теряет revenue tier фокус.
 
-**Решение:** **Pod-структура.** 3-4 Director-lite (marketing-pod-lead, client-pod-lead, product-pod-lead, ops-pod-lead) под Top-Director'ом. Top = CEO-level (для Хозяина — Atlas).
+**Решение:** **Pod-структура.** 3-4 Director-lite (marketing-pod-lead, client-pod-lead, product-pod-lead, ops-pod-lead) под Top-Director'ом. Top = CEO-level (для Хозяина — Director).
 
 ### 4. Память — три разных namespace
 - **Marketing memory** — что постили, что работало, brand evolution
@@ -82,32 +82,32 @@ office/pods/{name}/
 
 ---
 
-## Пример: Нейроштаб (Хозяин)
+## Пример: офис с 17 агентами
 
 Текущие 17 агентов разбиваются на pod'ы по revenue tier:
 
 | Pod | Агенты | Зона |
 |-----|--------|------|
-| **Top** | Atlas (CEO/Director) | Координация всех pod'ов, ритуалы дня |
-| **Sales-pod** | Producer, Equalizer, Hermes | Tier 1 — оффер, КП, закрытие сделок |
+| **Top** | Director | Координация всех pod'ов, ритуалы дня |
+| **Sales-pod** | Producer, Equalizer, Account Executive | Tier 1 — оффер, КП, закрытие сделок |
 | **Marketing-pod** | Copywriter, Designer, Intelligence, SEO, Videographer | Tier 2 — контент, прогрев, каналы |
-| **Product-pod** | Tech Lead, Frontend Designer, Vibe Coder | Tier 3 — Project X, платформа, AI Office |
-| **Ops-pod** | Methodologist, Mnemo, ПАРА, Researcher, Demiurg | Tier 4 — методология, knowledge, архитектура |
+| **Product-pod** | Tech Lead, Frontend Designer, Vibe Coder | Tier 3 — клиентский продукт, платформа, AI-офис |
+| **Ops-pod** | Methodologist, Data Architect, Knowledge Curator, Researcher, Demiurg | Tier 4 — методология, knowledge, архитектура |
 
 Каждый pod имеет своего pod-lead (для marketing — Producer; для product — Tech Lead) или ad-hoc координацию.
 
-### Что переделать в Нейроштабе
+### Что улучшить в этом офисе
 
-Текущая ситуация: Atlas роутит на 17 агентов напрямую. Это нарушает **Anthropic 4×4 > 1×8**.
+Текущая ситуация: Director роутит на 17 агентов напрямую. Это нарушает **Anthropic 4×4 > 1×8**.
 
-Будущее: Atlas роутит на 4 pod-leads, pod-leads — на специалистов внутри pod'а. Atlas видит **4 «отчёта»** в день, не 17.
+Будущее: Director роутит на 4 pod-leads, pod-leads — на специалистов внутри pod'а. Director видит **4 «отчёта»** в день, не 17.
 
 ---
 
 ## Главные риски в mixed-офисе
 
 ### Риск 1: Director'у скинули всё
-Симптом: Atlas в context.md держит 17 параллельных задач, постоянно теряет фокус.
+Симптом: Director в context.md держит 17 параллельных задач, постоянно теряет фокус.
 Лечение: pod-decomposition + правило «Top-Director видит только pod-level статусы, не индивидуальные».
 
 ### Риск 2: Дрейф зон между pod'ами
@@ -123,8 +123,8 @@ office/pods/{name}/
 Лечение: правило «pod ≤ 4 specialists» строгое. Если больше — split на под-pod'ы (под-marketing → content + ads + design).
 
 ### Риск 5: Top-Director знает слишком мало
-Симптом: Atlas принимает решения не зная контекст pod'а → плохой роутинг.
-Лечение: pod-leads присылают Atlas weekly digest (что сделано / что в работе / что нужно от Top), не каждое движение.
+Симптом: Director принимает решения не зная контекст pod'а → плохой роутинг.
+Лечение: pod-leads присылают Director weekly digest (что сделано / что в работе / что нужно от Top), не каждое движение.
 
 ---
 
@@ -144,7 +144,7 @@ office/pods/{name}/
 
 ## Memory особенности mixed-офиса
 
-### Top-level memory (CEO / Atlas)
+### Top-level memory (CEO / Director)
 ```
 office/
   context.md              # Pulse дня по всем pod'ам (≤50 строк)
@@ -152,7 +152,7 @@ office/
     weekly-digests/       # Pod-level отчёты
     decisions/            # Cross-pod решения
   agents/director/
-    memory.md             # Решения Atlas как координатора
+    memory.md             # Решения Director как координатора
     failures.md           # Ошибки роутинга на pod-level
 ```
 
@@ -215,8 +215,8 @@ office/
 ## Эталоны
 
 **Внутренние:**
-- `office/AGENTS.md` — Нейроштаб как живой mixed (17 агентов, нужна pod-decomposition)
-- `office/CLAUDE.md` — Top-Director (Atlas) — пример но > 200 строк (надо сжать при pod-разбиении)
+- Этот обезличенный пример показывает mixed-офис на 17 агентов, которому нужна pod-decomposition
+- Top-Director в примере превышает 200 строк; при разделении на pod его нужно сжать
 
 **Внешние:**
 - [Anthropic — 2 команды по 4 > 1 команды из 8](https://www.anthropic.com/engineering/multi-agent-research-system)
