@@ -193,7 +193,7 @@ Director прогоняет себя через чеклист:
 | **Dev-офис** | Глубокий tech tier filter, CE pipeline, debug triage, rollback policy |
 | **Marketing-офис** | Brand guidelines в Quality Gate, content calendar awareness, performance metrics |
 | **Client-офис** | Per-client context (читает `clients/{id}/CLAUDE.md`), human-in-the-loop на trust boundaries, proactive check-ins |
-| **Mixed (Нейроштаб)** | Pod-aware (роутит через pod-leads, не напрямую), revenue tier как главный фильтр, проактивные nudge |
+| **Mixed (гибридный офис)** | Pod-aware (роутит через pod-leads, не напрямую), revenue tier как главный фильтр, проактивные nudge |
 
 ---
 

@@ -147,7 +147,7 @@ Multi-agent стоит ~15× токенов и не окупается для м
 
 - **`office-types/marketing.md`** — состав 6 ролей (Campaign Strategist, Copywriter, Designer, Content Strategist, Performance Analyst, Intelligence). Brand guidelines как validator, tone-of-voice как linter, CTR как test-suite.
 - **`office-types/client.md`** — состав 7 ролей (Client Director, BDR/SDR, AE, Proposal, Customer Success, Support Triage, Intelligence). Long-running memory critical, bi-temporal graph для устаревающих фактов, human-in-the-loop на trust boundaries.
-- **`office-types/mixed.md`** — гибрид (Нейроштаб). > 8 агентов → pod'ы обязательны (один Director-lite на pod, Top-Director связывает). Главная опасность — пересечение зон.
+- **`office-types/mixed.md`** — гибридный офис. > 8 агентов → pod'ы обязательны (один Director-lite на pod, Top-Director связывает). Главная опасность — пересечение зон.
 
 ---
 

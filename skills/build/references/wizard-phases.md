@@ -84,7 +84,7 @@
 
 ## Фаза 5.5 — SOUL LAYER
 
-Creator (внешний спец Хозяина; в паке нет — фаза Soul опциональна без него) добавляет:
+Демиург в фазе SOUL добавляет:
 - `office-identity/philosophy.md` — миссия + ценности
 - `office-identity/voice-guide.md` — тон офиса
 - `## Характер` в каждый CLAUDE.md (5-8 строк)

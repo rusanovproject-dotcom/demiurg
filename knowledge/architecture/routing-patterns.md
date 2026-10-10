@@ -116,7 +116,7 @@ yaml-шаблон с `objective / context / expected_output / boundaries`. См.
 | Источник | Как обрабатывается |
 |----------|-------------------|
 | Прямой чат с Director (Claude Code) | Стандартный путь: classify → route → handoff |
-| Telegram → my-assistant → Atlas | Atlas как live front-end → передаёт Director'у |
+| Telegram → my-assistant → Director | Director как live front-end → передаёт Director'у |
 | Notion (вручную поставлено) | Director видит при `/triage` или старте `/morning` |
 | Email (через MCP gmail) | Заявки клиентов → Hermes (продажи) |
 | Web-форма (my-booking / my-form) | Через VPS API → Notion DB → Director видит |

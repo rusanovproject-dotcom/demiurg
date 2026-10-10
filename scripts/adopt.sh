@@ -1,64 +1,73 @@
-#!/bin/bash
-# adopt.sh — фаза ADOPT конвейера /build: установка одобренного стека из scout-досье.
-# Читает таблицу «ADOPT-предложение» досье, показывает план; с --apply ставит строки
-# с вердиктом «ставим обязательно» и дописывает «ADOPT-итог (adopt.sh)» в досье.
-# «опционально» — только печатает (решение Хозяина), «отклонено» — пропускает.
-# Использование: ./adopt.sh <путь-к-досье.md> [--apply]
-
+#!/usr/bin/env bash
+# ADOPT: читает согласованное scout-досье. Без --apply только показывает план.
+# Поддерживает новый формат с колонкой «Слой/этап» и старые досье с 6 колонками.
 set -uo pipefail
 
-DOSSIER="${1:?Укажи путь к scout-досье: ./adopt.sh knowledge/scout/<slug>-YYYY-MM-DD.md [--apply]}"
+DOSSIER="${1:?Укажи scout-досье: scripts/adopt.sh knowledge/scout/<slug>-YYYY-MM-DD.md [--apply]}"
 APPLY="${2:-}"
-
 [[ -f "$DOSSIER" ]] || { echo "✗ Досье не найдено: $DOSSIER"; exit 1; }
+[[ -z "$APPLY" || "$APPLY" == "--apply" ]] || { echo "✗ Неизвестный аргумент: $APPLY"; exit 1; }
 
-# Вырезаем таблицу секции «ADOPT-предложение» (строки |...| до следующего заголовка)
-TABLE=$(awk '/^## ADOPT-предложение/{f=1;next} f&&/^## /{exit} f&&/^\|/ && !/^\|[ \t:|-]*$/ && !/Инструмент/' "$DOSSIER" || true)
+trim() { sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+TABLE=$(awk '/^## ADOPT-предложение/{f=1;next} f&&/^## /{exit} f&&/^\|/{print}' "$DOSSIER")
+[[ -n "$TABLE" ]] || { echo "✗ В досье нет таблицы ADOPT-предложение"; exit 1; }
 
-[[ -n "$TABLE" ]] || { echo "✗ В досье нет таблицы «ADOPT-предложение» — досье собрано старым скаутом? Перегони /scout."; exit 1; }
-
-MUST=0; OPT=0; REJ=0; OK=0; FAIL=0
-RESULTS=""
-
+MUST=0; OPT=0; REJ=0; OK=0; FAIL=0; RESULTS=""
 echo "═══ ADOPT: $DOSSIER ═══"
-while IFS='|' read -r _ tool type tier verdict why cmd _; do
-  tool=$(echo "$tool" | xargs); verdict=$(echo "$verdict" | xargs); cmd=$(echo "$cmd" | xargs | sed 's/^`//;s/`$//')
-  [[ -z "$tool" ]] && continue
-  case "$verdict" in
-    *обязательно*)
+while IFS= read -r line; do
+  tool=$(printf '%s' "$line" | cut -d'|' -f2 | trim)
+  [[ -z "$tool" || "$tool" == "Инструмент" || "$tool" == "Скилл/инструмент" || "$tool" == ---* ]] && continue
+  fields=$(printf '%s' "$line" | awk -F'|' '{print NF}')
+  if [[ "$fields" -ge 9 ]]; then
+    decision=$(printf '%s' "$line" | cut -d'|' -f5 | trim)
+    command=$(printf '%s' "$line" | cut -d'|' -f8 | trim)
+  elif [[ "$fields" -eq 8 ]]; then
+    decision=$(printf '%s' "$line" | cut -d'|' -f5 | trim)
+    command=$(printf '%s' "$line" | cut -d'|' -f7 | trim)
+  else
+    echo "✗ Некорректная строка таблицы: $tool"; FAIL=$((FAIL+1)); continue
+  fi
+  command=${command#\`}; command=${command%\`}
+  case "$decision" in
+    *"в основу"*|*"обязательно"*)
       MUST=$((MUST+1))
       if [[ "$APPLY" == "--apply" ]]; then
-        echo "→ ставлю: $tool  ($cmd)"
-        if [[ -z "$cmd" || "$cmd" == "—" ]]; then
-          echo "  ⚠ нет команды установки — пропуск"; RESULTS+="- ⚠ $tool: команда установки не указана"$'\n'
-        elif bash -c "$cmd"; then
-          OK=$((OK+1)); RESULTS+="- ✓ поставлено: $tool (\`$cmd\`)"$'\n'
+        if [[ -z "$command" || "$command" == "—" || "$command" == *...* ]]; then
+          echo "✗ $tool: нет конкретной команды установки"; FAIL=$((FAIL+1)); continue
+        fi
+        if ! printf '%s' "$command" | grep -Eq '^(npx skills add |claude mcp add )'; then
+          echo "✗ $tool: установка вручную, команда вне разрешённого списка"; FAIL=$((FAIL+1)); continue
+        fi
+        if printf '%s' "$command" | grep -Eq '[;&|$()<>`\\]'; then
+          echo "✗ $tool: команда содержит управляющие символы"; FAIL=$((FAIL+1)); continue
+        fi
+        echo "→ ставлю: $tool ($command)"
+        if bash -c "$command"; then
+          OK=$((OK+1)); RESULTS+="- ✓ поставлено: $tool (\`$command\`)"$'\n'
         else
-          FAIL=$((FAIL+1)); RESULTS+="- ✗ провал установки: $tool (\`$cmd\`) — разобраться руками"$'\n'
+          FAIL=$((FAIL+1)); RESULTS+="- ✗ провал установки: $tool (\`$command\`)"$'\n'
         fi
       else
-        echo "  [обязательно] $tool — $cmd"
+        echo "  [в основу] $tool — $command"
       fi ;;
-    *опционально*|*спросить*)
-      OPT=$((OPT+1)); echo "  [опционально] $tool — решение Хозяина, сам не ставлю" ;;
-    *отклонено*)
-      REJ=$((REJ+1)) ;;
+    *"на выбор"*|*"на обсуждение"*|*"опционально"*|*"спросить"*)
+      OPT=$((OPT+1)); echo "  [на выбор] $tool — решение владельца, сам не ставлю" ;;
+    *"отклонено"*) REJ=$((REJ+1)) ;;
+    *) echo "✗ $tool: неизвестное решение '$decision'"; FAIL=$((FAIL+1)) ;;
   esac
 done <<< "$TABLE"
 
-echo "───"
-echo "Обязательных: $MUST · опциональных (ждут Хозяина): $OPT · отклонено: $REJ"
-
+echo "Обязательных: $MUST · на выбор: $OPT · отклонено: $REJ · ошибок: $FAIL"
 if [[ "$APPLY" == "--apply" ]]; then
   {
     echo ""
     echo "## ADOPT-итог (adopt.sh, $(date +%Y-%m-%d))"
-    echo "$RESULTS"
-    echo "- Опциональных не тронуто: $OPT · отклонено по досье: $REJ"
-    echo "- TODO Демиургу: конкретные \`mcp__server__tool\` поставленных MCP → в \`knowledge/{agent}/_toolmap.md\`"
+    printf '%s' "$RESULTS"
+    echo "- На выбор не тронуто: $OPT · отклонено: $REJ · ошибок: $FAIL"
+    echo '- Демиургу: фактические `mcp__server__tool` поставленных MCP → `knowledge/{agent}/_toolmap.md`'
   } >> "$DOSSIER"
-  echo "Итог дописан в досье. Успешно: $OK, провалов: $FAIL"
-  [[ $FAIL -eq 0 ]] || exit 1
+  echo "Итог дописан в досье. Успешно: $OK, ошибок: $FAIL"
 else
-  echo "Сухой прогон. Ставить: ./adopt.sh $DOSSIER --apply"
+  echo "Сухой прогон. После согласования: bash scripts/adopt.sh $DOSSIER --apply"
 fi
+[[ $FAIL -eq 0 ]]
